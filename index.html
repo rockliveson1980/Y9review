@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Year 9 Unit 1: Percentages & Money - Dynamic Review Quiz</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .option-card:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .correct-card {
+            border-color: #10b981 !important;
+            background-color: #ecfdf5 !important;
+        }
+        .incorrect-card {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
+
+    <!-- Header -->
+    <header class="bg-teal-700 text-white shadow-lg py-6 px-4 mb-8">
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold">Year 9 Maths: Percentages & Money Review</h1>
+                <p class="text-teal-100 text-sm mt-1">Dynamic Practice Quiz &bull; Fresh numbers on every refresh!</p>
+            </div>
+            <div class="flex items-center gap-4 bg-teal-800 px-4 py-2 rounded-lg">
+                <span class="text-sm font-medium">Score: <span id="score-display" class="text-xl font-bold text-yellow-300">0</span> / <span id="total-display">0</span></span>
+                <button onclick="generateQuiz()" class="text-xs bg-teal-600 hover:bg-teal-500 text-white font-semibold py-1.5 px-3 rounded transition shadow">
+                    Generate New Numbers
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4">
+        
+        <!-- Navigation Bar -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6">
+            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Jump to Topic Section</h2>
+            <div class="flex flex-wrap gap-2" id="topic-tags"></div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quiz-container" class="space-y-8"></div>
+
+        <!-- Finish Banner -->
+        <div id="results-card" class="hidden mt-8 p-6 bg-white rounded-xl shadow-md border border-teal-100 text-center">
+            <h2 class="text-2xl font-bold text-teal-900 mb-2">Quiz Completed!</h2>
+            <p class="text-slate-600 mb-4" id="results-summary"></p>
+            <button onclick="generateQuiz()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-6 rounded-lg shadow transition">
+                Try Again with New Random Numbers
+            </button>
+        </div>
+    </main>
+
+    <script>
+        // Helper randomizer functions
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function formatMoney(amount, symbol = "&pound;") {
+            return symbol + amount.toFixed(2);
+        }
+
+        let answeredCount = 0;
+        let score = 0;
+        let totalQuestions = 0;
+        let quizSections = [];
+
+        function generateQuizData() {
+            // Q1: Probability complement
+            const probPercent = randInt(40, 85);
+            const probNot = 100 - probPercent;
+
+            // Q2: Percentage Increase
+            const originalPrice = randInt(25, 95);
+            const incPercent = randInt(4, 15);
+            const newPrice = originalPrice * (1 + incPercent / 100);
+
+            // Q3: Amount as Percentage
+            const partVal = (randInt(1, 8) * 0.50).toFixed(2);
+            const totalVal = randInt(15, 40);
+            const percentAns = ((partVal / totalVal) * 100).toFixed(1);
+
+            // Q4: Percentage Increase calculation
+            const origPax = randInt(40, 90);
+            const diffPax = randInt(10, 25);
+            const newPax = origPax + diffPax;
+            const paxIncPercent = ((diffPax / origPax) * 100).toFixed(1);
+
+            // Q5: Best Value Comparison (Cola/Juice)
+            const b1_vol = 2000; const b1_cost = (randInt(180, 240) / 100); // 2L
+            const b2_vol = 500;  const b2_cost = (randInt(50, 75) / 100);  // 500ml
+            const b3_vol = 1250; const b3_cost = (randInt(120, 160) / 100); // 1.25L
+
+            const p1 = b1_cost / b1_vol; // per ml
+            const p2 = b2_cost / b2_vol;
+            const p3 = b3_cost / b3_vol;
+
+            let bestOption = "2 Litre bottle";
+            if (p2 < p1 && p2 < p3) bestOption = "500 ml bottle";
+            if (p3 < p1 && p3 < p2) bestOption = "1.25 Litre bottle";
+
+            // Q6: Simple Interest
+            const simPrincipal = randInt(15, 45) * 100;
+            const simRate = (randInt(12, 35) / 10).toFixed(1);
+            const simYears = randInt(3, 6);
+            const simInterest = (simPrincipal * (simRate / 100) * simYears);
+
+            // Q7: Compound Interest (2 years)
+            const compPrincipal = randInt(4, 12) * 100;
+            const compRate = (randInt(18, 45) / 10).toFixed(1);
+            const compVal = (compPrincipal * Math.pow(1 + compRate / 100, 2)).toFixed(2);
+
+            // Q8: Currency Conversion Notes
+            const exchangeRate = randInt(155, 185);
+            const budgetGbp = randInt(2, 5) * 100;
+            const totalYen = budgetGbp * exchangeRate;
+            const notes1000 = Math.floor(totalYen / 1000);
+
+            // Q9: Multi-year Compound Total
+            const c9_p = randInt(30, 80) * 100;
+            const c9_r = (randInt(20, 50) / 10).toFixed(1);
+            const c9_yrs = randInt(4, 7);
+            const c9_total = (c9_p * Math.pow(1 + c9_r / 100, c9_yrs)).toFixed(2);
+
+            // Q10: Conversion Graph simulation (£1 = Y Yuan)
+            const graphRate = randInt(8, 12); // e.g. £1 = 9 Yuan
+            const g_pounds = randInt(6, 9);
+            const g_yuan_ans = g_pounds * graphRate;
+            const g_yuan_in = randInt(3, 6) * 10;
+            const g_pounds_ans = (g_yuan_in / graphRate).toFixed(2);
+
+            // Q11: Bank comparison
+            const b_deposit = randInt(20, 50) * 1000;
+            const bankA_rate = 3.0;
+            const bankA_val = b_deposit * Math.pow(1.03, 4);
+
+            const bankB_r1 = 5.2;
+            const bankB_rRem = 2.4;
+            const bankB_val = (b_deposit * (1 + bankB_r1/100)) * Math.pow(1 + bankB_rRem/100, 3);
+
+            const betterBank = bankA_val > bankB_val ? "Bank A" : "Bank B";
+            const diffBank = Math.abs(bankA_val - bankB_val).toFixed(2);
+
+            // Q12: Compound Interest Earned Only
+            const c12_p = randInt(50, 90) * 100;
+            const c12_r = (randInt(25, 45) / 10).toFixed(1);
+            const c12_total = c12_p * Math.pow(1 + c12_r/100, 2);
+            const c12_interest = (c12_total - c12_p).toFixed(2);
+
+            // Q13: Years to reach target threshold
+            const targetCap = 2000;
+            const initCap = randInt(16, 18) * 100;
+            const tRate = (randInt(45, 75) / 10).toFixed(1);
+            let yearsNeeded = 0;
+            let tempCap = initCap;
+            while (tempCap < targetCap) {
+                tempCap *= (1 + tRate / 100);
+                yearsNeeded++;
+            }
+
+            // Q14: Hire Purchase / Deposit & Instalments
+            const itemCost = randInt(4, 9) * 100;
+            const depPercent = 20;
+            const depVal = itemCost * (depPercent / 100);
+            const remVal = itemCost - depVal;
+            const monthVal = (remVal / 12).toFixed(2);
+
+            // Q15: VAT Calculation
+            const laptopCost = randInt(45, 85) * 10;
+            const vatRate = 20;
+            const totalLaptop = (laptopCost * 1.20).toFixed(2);
+
+            return [
+                {
+                    topic: "Basic Probability",
+                    questions: [
+                        {
+                            id: "q1",
+                            question: `A weather forecaster predicts that there is a <strong>${probPercent}%</strong> chance of rain tomorrow. <br>What is the probability that it will <strong>not</strong> rain tomorrow?`,
+                            options: [
+                                `${probNot}%`,
+                                `${probPercent}%`,
+                                `${probNot - 5}%`,
+                                `${100 + probPercent}%`
+                            ],
+                            answer: `${probNot}%`,
+                            explanation: `Complementary probabilities sum to 100%. <br>100% - ${probPercent}% = <strong>${probNot}%</strong>.`
+                        }
+                    ]
+                },
+                {
+                    topic: "Percentage Change & Multipliers",
+                    questions: [
+                        {
+                            id: "q2",
+                            question: `A concert hall increases ticket prices by <strong>${incPercent}%</strong>. <br>Before the increase, a ticket cost <strong>&pound;${originalPrice}</strong>. Work out the ticket price after the increase.`,
+                            options: [
+                                `&pound;${newPrice.toFixed(2)}`,
+                                `&pound;${(originalPrice + incPercent).toFixed(2)}`,
+                                `&pound;${(originalPrice * (incPercent/100)).toFixed(2)}`,
+                                `&pound;${(newPrice + 5).toFixed(2)}`
+                            ],
+                            answer: `&pound;${newPrice.toFixed(2)}`,
+                            explanation: `Multiplier = 1 + (${incPercent}/100) = ${(1 + incPercent/100).toFixed(2)}. <br>&pound;${originalPrice} &times; ${(1 + incPercent/100).toFixed(2)} = <strong>&pound;${newPrice.toFixed(2)}</strong>.`
+                        },
+                        {
+                            id: "q3",
+                            question: `Work out <strong>$${partVal}</strong> as a percentage of <strong>$${totalVal}</strong>.`,
+                            options: [
+                                `${percentAns}%`,
+                                `${(percentAns * 1.2).toFixed(1)}%`,
+                                `${(percentAns / 2).toFixed(1)}%`,
+                                `${(parseFloat(percentAns) + 5).toFixed(1)}%`
+                            ],
+                            answer: `${percentAns}%`,
+                            explanation: `(${partVal} &divide; ${totalVal}) &times; 100 = <strong>${percentAns}%</strong>.`
+                        },
+                        {
+                            id: "q4",
+                            question: `The number of passengers on a bus increases from <strong>${origPax}</strong> to <strong>${newPax}</strong>. <br>Calculate the percentage increase.`,
+                            options: [
+                                `${paxIncPercent}%`,
+                                `${(paxIncPercent * 0.8).toFixed(1)}%`,
+                                `${(diffPax).toFixed(1)}%`,
+                                `${(paxIncPercent * 1.15).toFixed(1)}%`
+                            ],
+                            answer: `${paxIncPercent}%`,
+                            explanation: `Increase = ${newPax} - ${origPax} = ${diffPax}. <br>(${diffPax} &divide; ${origPax}) &times; 100 = <strong>${paxIncPercent}%</strong>.`
+                        }
+                    ]
+                },
+                {
+                    topic: "Best Value & Unit Pricing",
+                    questions: [
+                        {
+                            id: "q5",
+                            question: `A shop sells lemonade in three different sizes: <br>
+                            &bull; <strong>2 Litre</strong> (2000 ml) for &pound;${b1_cost.toFixed(2)} <br>
+                            &bull; <strong>500 ml</strong> for ${Math.round(b2_cost*100)}p <br>
+                            &bull; <strong>1.25 Litre</strong> (1250 ml) for &pound;${b3_cost.toFixed(2)} <br><br>
+                            Which size bottle offers the <strong>best value for money</strong>?`,
+                            options: [
+                                "2 Litre bottle",
+                                "500 ml bottle",
+                                "1.25 Litre bottle",
+                                "All offer equal value"
+                            ],
+                            answer: bestOption,
+                            explanation: `Cost per litre (1000 ml): <br>
+                            &bull; 2L: &pound;${(b1_cost/2).toFixed(3)} / litre <br>
+                            &bull; 500ml: &pound;${(b2_cost*2).toFixed(3)} / litre <br>
+                            &bull; 1.25L: &pound;${(b3_cost/1.25).toFixed(3)} / litre. <br>
+                            Lowest cost per litre is the <strong>${bestOption}</strong>.`
+                        }
+                    ]
+                },
+                {
+                    topic: "Simple & Compound Interest",
+                    questions: [
+                        {
+                            id: "q6",
+                            question: `An investor places <strong>&pound;${simPrincipal}</strong> into a savings account for <strong>${simYears} years</strong>. <br>The account pays simple interest at a rate of <strong>${simRate}% per year</strong>. <br>Work out the <strong>total interest</strong> earned at the end of ${simYears} years.`,
+                            options: [
+                                `&pound;${simInterest.toFixed(2)}`,
+                                `&pound;${(simInterest / simYears).toFixed(2)}`,
+                                `&pound;${(simPrincipal + simInterest).toFixed(2)}`,
+                                `&pound;${(simInterest * 1.2).toFixed(2)}`
+                            ],
+                            answer: `&pound;${simInterest.toFixed(2)}`,
+                            explanation: `Interest per year = &pound;${simPrincipal} &times; ${(simRate/100).toFixed(3)} = &pound;${(simPrincipal*(simRate/100)).toFixed(2)}. <br>For ${simYears} years = &pound;${(simPrincipal*(simRate/100)).toFixed(2)} &times; ${simYears} = <strong>&pound;${simInterest.toFixed(2)}</strong>.`
+                        },
+                        {
+                            id: "q7",
+                            question: `A bank pays <strong>${compRate}% compound interest</strong> per year. <br>An investment of <strong>&pound;${compPrincipal}</strong> is made for <strong>2 years</strong>. <br>Calculate the total value of the investment after 2 years.`,
+                            options: [
+                                `&pound;${compVal}`,
+                                `&pound;${(compPrincipal * (1 + (compRate*2)/100)).toFixed(2)}`,
+                                `&pound;${(compPrincipal * (compRate/100) * 2).toFixed(2)}`,
+                                `&pound;${(parseFloat(compVal) + 20).toFixed(2)}`
+                            ],
+                            answer: `&pound;${compVal}`,
+                            explanation: `Value = ${compPrincipal} &times; (1 + ${compRate}/100)<sup>2</sup> = ${compPrincipal} &times; ${(1 + compRate/100).toFixed(3)}<sup>2</sup> = <strong>&pound;${compVal}</strong>.`
+                        },
+                        {
+                            id: "q9",
+                            question: `An investment of <strong>$${c9_p}</strong> grows at <strong>${c9_r}% compound interest per year</strong> for <strong>${c9_yrs} years</strong>. <br>Find the total amount in the account after ${c9_yrs} years.`,
+                            options: [
+                                `$${c9_total}`,
+                                `$${(c9_p * (1 + (c9_r * c9_yrs)/100)).toFixed(2)}`,
+                                `$${(c9_total * 0.85).toFixed(2)}`,
+                                `$${(c9_p * Math.pow(1 + c9_r/100, c9_yrs - 1)).toFixed(2)}`
+                            ],
+                            answer: `$${c9_total}`,
+                            explanation: `Formula: P(1 + r)<sup>n</sup> = ${c9_p} &times; (1 + ${c9_r/100})<sup>${c9_yrs}</sup> = <strong>$${c9_total}</strong>.`
+                        },
+                        {
+                            id: "q12",
+                            question: "An amount of <strong>$" + c12_p + "</strong> is invested for <strong>2 years</strong> at <strong>" + c12_r + "% compound interest</strong> per year. <br>Work out the total amount of <strong>interest earned</strong> (interest only) by the end of 2 years.",
+                            options: [
+                                `$${c12_interest}`,
+                                `$${(c12_p * Math.pow(1 + c12_r/100, 2)).toFixed(2)}`,
+                                `$${(c12_p * (c12_r/100)).toFixed(2)}`,
+                                `$${(c12_interest * 1.25).toFixed(2)}`
+                            ],
+                            answer: `$${c12_interest}`,
+                            explanation: `Total Value = $${c12_p} &times; ${(1 + c12_r/100).toFixed(3)}<sup>2</sup> = $${c12_total.toFixed(2)}. <br>Interest = Total Value - Principal = $${c12_total.toFixed(2)} - $${c12_p} = <strong>$${c12_interest}</strong>.`
+                        }
+                    ]
+                },
+                {
+                    topic: "Currency & Exchange Calculations",
+                    questions: [
+                        {
+                            id: "q8",
+                            question: `A traveller wants to change up to <strong>&pound;${budgetGbp}</strong> into Japanese Yen (&yen;). <br>The bank only stocks <strong>&yen;1000 notes</strong>. The exchange rate is <strong>&pound;1 = &yen;${exchangeRate}</strong>. <br>What is the maximum number of &yen;1000 notes they can get?`,
+                            options: [
+                                `${notes1000} notes`,
+                                `${notes1000 + 1} notes`,
+                                `${notes1000 - 2} notes`,
+                                `${Math.floor(totalYen / 100)} notes`
+                            ],
+                            answer: `${notes1000} notes`,
+                            explanation: `Total Yen = &pound;${budgetGbp} &times; ${exchangeRate} = &yen;${totalYen}. <br>&yen;${totalYen} &divide; 1000 = ${(totalYen/1000).toFixed(2)}. Round down to complete notes: <strong>${notes1000} notes</strong>.`
+                        },
+                        {
+                            id: "q10",
+                            question: `An exchange rate rule states that <strong>&pound;1 = ${graphRate} Yuan</strong>. <br>Convert <strong>&pound;${g_pounds}</strong> into Yuan.`,
+                            options: [
+                                `${g_yuan_ans} Yuan`,
+                                `${g_yuan_ans + 5} Yuan`,
+                                `${(g_pounds / graphRate).toFixed(1)} Yuan`,
+                                `${g_yuan_ans - 8} Yuan`
+                            ],
+                            answer: `${g_yuan_ans} Yuan`,
+                            explanation: `&pound;${g_pounds} &times; ${graphRate} = <strong>${g_yuan_ans} Yuan</strong>.`
+                        }
+                    ]
+                },
+                {
+                    topic: "Advanced Money & Financial Comparison",
+                    questions: [
+                        {
+                            id: "q11",
+                            question: `A customer invests <strong>&pound;${b_deposit.toLocaleString()}</strong> for 4 years: <br>
+                            &bull; <strong>Bank A:</strong> ${bankA_rate}% compound interest per year for all 4 years. <br>
+                            &bull; <strong>Bank B:</strong> ${bankB_r1}% interest for the first year, then ${bankB_rRem}% compound interest for the remaining 3 years. <br><br>
+                            Which bank provides the most money at the end of 4 years?`,
+                            options: [
+                                `${betterBank}`,
+                                `Both give exact same amount`
+                            ],
+                            answer: betterBank,
+                            explanation: `Bank A Total = &pound;${b_deposit} &times; 1.03<sup>4</sup> = &pound;${bankA_val.toFixed(2)}. <br>
+                            Bank B Total = &pound;${b_deposit} &times; ${(1 + bankB_r1/100).toFixed(3)} &times; ${(1 + bankB_rRem/100).toFixed(3)}<sup>3</sup> = &pound;${bankB_val.toFixed(2)}. <br>
+                            <strong>${betterBank}</strong> is higher by &pound;${diffBank}.`
+                        },
+                        {
+                            id: "q13",
+                            question: `An investor deposits <strong>$${initCap}</strong> into an account paying <strong>${tRate}% compound interest per year</strong>. <br>How many full years will it take for the balance to reach at least <strong>$${targetCap}</strong>?`,
+                            options: [
+                                `${yearsNeeded} years`,
+                                `${yearsNeeded + 1} years`,
+                                `${yearsNeeded - 1} years`,
+                                `${yearsNeeded + 2} years`
+                            ],
+                            answer: `${yearsNeeded} years`,
+                            explanation: `Compounding year by year: balance exceeds $${targetCap} during year <strong>${yearsNeeded}</strong>.`
+                        },
+                        {
+                            id: "q14",
+                            question: `A store sells an appliance for <strong>&pound;${itemCost}</strong> on interest-free credit. <br>The store requires a <strong>${depPercent}% deposit</strong>, and the remainder paid in <strong>12 equal monthly payments</strong>. <br>Calculate the cost of each monthly payment.`,
+                            options: [
+                                `&pound;${monthVal}`,
+                                `&pound;${(itemCost / 12).toFixed(2)}`,
+                                `&pound;${(depVal / 12).toFixed(2)}`,
+                                `&pound;${(parseFloat(monthVal) + 10).toFixed(2)}`
+                            ],
+                            answer: `&pound;${monthVal}`,
+                            explanation: `Deposit = ${depPercent}% of &pound;${itemCost} = &pound;${depVal}. <br>Remaining balance = &pound;${itemCost} - &pound;${depVal} = &pound;${remVal}. <br>Monthly payment = &pound;${remVal} &divide; 12 = <strong>&pound;${monthVal}</strong>.`
+                        },
+                        {
+                            id: "q15",
+                            question: `In the UK, standard VAT is <strong>20%</strong>. <br>The price of a computer excluding VAT is <strong>&pound;${laptopCost}</strong>. <br>Work out the price including VAT.`,
+                            options: [
+                                `&pound;${totalLaptop}`,
+                                `&pound;${(laptopCost * 0.20).toFixed(2)}`,
+                                `&pound;${(laptopCost + 20).toFixed(2)}`,
+                                `&pound;${(parseFloat(totalLaptop) + 30).toFixed(2)}`
+                            ],
+                            answer: `&pound;${totalLaptop}`,
+                            explanation: `Price including VAT = &pound;${laptopCost} &times; 1.20 = <strong>&pound;${totalLaptop}</strong>.`
+                        }
+                    ]
+                }
+            ];
+        }
+
+        function generateQuiz() {
+            quizSections = generateQuizData();
+            const container = document.getElementById('quiz-container');
+            const topicTagsNav = document.getElementById('topic-tags');
+            
+            container.innerHTML = '';
+            topicTagsNav.innerHTML = '';
+            document.getElementById('results-card').classList.add('hidden');
+            
+            score = 0;
+            answeredCount = 0;
+            totalQuestions = 0;
+
+            quizSections.forEach((section, sIndex) => {
+                totalQuestions += section.questions.length;
+
+                const tag = document.createElement('a');
+                tag.href = `#topic-${sIndex}`;
+                tag.className = "text-xs font-medium bg-slate-100 hover:bg-teal-50 text-teal-700 px-3 py-1.5 rounded-full border border-slate-200 transition";
+                tag.textContent = section.topic;
+                topicTagsNav.appendChild(tag);
+
+                const sectionEl = document.createElement('div');
+                sectionEl.id = `topic-${sIndex}`;
+                sectionEl.className = "bg-white p-6 rounded-xl shadow-sm border border-slate-200";
+
+                let sectionHtml = `<h2 class="text-xl font-bold text-slate-800 pb-3 border-b border-slate-100 mb-6 flex items-center justify-between">
+                    <span>${section.topic}</span>
+                    <span class="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded">${section.questions.length} Questions</span>
+                </h2>`;
+
+                sectionHtml += `<div class="space-y-6">`;
+
+                section.questions.forEach((q) => {
+                    const shuffledOpts = shuffle([...q.options]);
+                    
+                    sectionHtml += `
+                        <div class="p-4 rounded-lg bg-slate-50 border border-slate-200" id="card-${q.id}">
+                            <p class="font-medium text-slate-800 mb-3">${q.question}</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                                ${shuffledOpts.map((opt) => `
+                                    <button onclick="checkAnswer('${q.id}', this, '${encodeURIComponent(opt)}', '${encodeURIComponent(q.answer)}')" 
+                                            class="option-card option-btn-${q.id} text-left p-3 rounded-lg border border-slate-300 bg-white text-sm transition font-normal">
+                                        ${opt}
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <div id="feedback-${q.id}" class="hidden mt-3 p-3 text-sm rounded-lg"></div>
+                        </div>
+                    `;
+                });
+
+                sectionHtml += `</div>`;
+                sectionEl.innerHTML = sectionHtml;
+                container.appendChild(sectionEl);
+            });
+
+            document.getElementById('total-display').textContent = totalQuestions;
+            document.getElementById('score-display').textContent = "0";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function checkAnswer(qId, clickedBtn, selectedOptEnc, correctOptEnc) {
+            const selectedOpt = decodeURIComponent(selectedOptEnc);
+            const correctOpt = decodeURIComponent(correctOptEnc);
+            const btns = document.querySelectorAll(`.option-btn-${qId}`);
+            const feedback = document.getElementById(`feedback-${qId}`);
+
+            let qData;
+            for (let section of quizSections) {
+                let found = section.questions.find(q => q.id === qId);
+                if (found) { qData = found; break; }
+            }
+
+            btns.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('option-card');
+                const btnText = btn.innerHTML.trim();
+                if (btnText === correctOpt) {
+                    btn.classList.add('correct-card');
+                } else if (btn === clickedBtn && selectedOpt !== correctOpt) {
+                    btn.classList.add('incorrect-card');
+                }
+            });
+
+            answeredCount++;
+
+            if (selectedOpt === correctOpt) {
+                score++;
+                feedback.className = "mt-3 p-3 text-sm rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200";
+                feedback.innerHTML = `<strong>Correct!</strong> ${qData.explanation}`;
+            } else {
+                feedback.className = "mt-3 p-3 text-sm rounded-lg bg-rose-50 text-rose-800 border border-rose-200";
+                feedback.innerHTML = `<strong>Incorrect.</strong> ${qData.explanation}`;
+            }
+
+            feedback.classList.remove('hidden');
+            document.getElementById('score-display').textContent = score;
+
+            if (answeredCount === totalQuestions) {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            const resultsCard = document.getElementById('results-card');
+            const summary = document.getElementById('results-summary');
+            const percentage = Math.round((score / totalQuestions) * 100);
+            
+            summary.innerHTML = `You scored <strong>${score} out of ${totalQuestions}</strong> (${percentage}%).`;
+            resultsCard.classList.remove('hidden');
+            resultsCard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        window.onload = generateQuiz;
+    </script>
+</body>
+</html>
